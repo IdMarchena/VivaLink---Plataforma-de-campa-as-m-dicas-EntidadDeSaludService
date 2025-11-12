@@ -1,0 +1,164 @@
+Listado de rutas de carpetas
+El número de serie del volumen es 6CBA-E373
+C:.
+¦   arbol.txt
+¦   build.xml
+¦   
++---build
+¦   +---empty
+¦   +---generated-sources
+¦   ¦   +---ap-source-output
+¦   +---web
+¦       ¦   index.html
+¦       ¦   
+¦       +---jsp
+¦       ¦       crearEntidadDeSalud.jsp
+¦       ¦       editarEntidadDeSalud.jsp
+¦       ¦       entidadNoEncontrada.jsp
+¦       ¦       lsitarEntidadesDeSalud.jsp
+¦       ¦       verEntidadDeSalud.jsp
+¦       ¦       
+¦       +---META-INF
+¦       ¦       context.xml
+¦       ¦       MANIFEST.MF
+¦       ¦       
+¦       +---WEB-INF
+¦           +---classes
+¦               ¦   .netbeans_automatic_build
+¦               ¦   .netbeans_update_resources
+¦               ¦   
+¦               +---dao
+¦               ¦   ¦   EntidadDeSaludDao.class
+¦               ¦   ¦   EntidadDeSaludDaoMongo.class
+¦               ¦   ¦   EntidadDeSaludDaoMysql.class
+¦               ¦   ¦   EntidadDeSaludDaoPostgres.class
+¦               ¦   ¦   
+¦               ¦   +---conexion
+¦               ¦           DatabaseConnection.class
+¦               ¦           MongoConnection.class
+¦               ¦           MysqlConnection.class
+¦               ¦           PostgreConnection.class
+¦               ¦           
+¦               +---dto
+¦               ¦       EntidadDeSaludDto.class
+¦               ¦       UsuarioDto.class
+¦               ¦       
+¦               +---external
+¦               ¦       UsuarioServciceClient.class
+¦               ¦       
+¦               +---facade
+¦               ¦       EntidadDeSaludFacade.class
+¦               ¦       
+¦               +---factory
+¦               ¦       DatabaseConnectionFactory.class
+¦               ¦       EntidadDeSaludDaoFactory.class
+¦               ¦       EntidadDeSaludFactory.class
+¦               ¦       
+¦               +---mapper
+¦               ¦       EntidadDeSaludMapper.class
+¦               ¦       
+¦               +---modelo
+¦               ¦       EntidadDeSalud.class
+¦               ¦       EntidadDeSaludPrivada.class
+¦               ¦       EntidadDeSaludPublica.class
+¦               ¦       Usuario.class
+¦               ¦       
+¦               +---presentacion
+¦               ¦       EntidadDeSaludServlet.class
+¦               ¦       
+¦               +---prototype
+¦               ¦       EntidadDeSaludPrototype.class
+¦               ¦       
+¦               +---repositorio
+¦               ¦       EntidadDeSaludRepository.class
+¦               ¦       
+¦               +---servicio
+¦                   +---service
+¦                   ¦       EntidadDeSaludService.class
+¦                   ¦       
+¦                   +---serviceImpl
+¦                           EntidadDeSaludServiceImpl.class
+¦                           
++---nbproject
+¦   ¦   ant-deploy.xml
+¦   ¦   build-impl.xml
+¦   ¦   genfiles.properties
+¦   ¦   project.properties
+¦   ¦   project.xml
+¦   ¦   
+¦   +---private
+¦           private.properties
+¦           private.xml
+¦           
++---src
+¦   +---conf
+¦   ¦       MANIFEST.MF
+¦   ¦       
+¦   +---java
+¦       +---dao
+¦       ¦   ¦   EntidadDeSaludDao.java
+¦       ¦   ¦   EntidadDeSaludDaoMongo.java
+¦       ¦   ¦   EntidadDeSaludDaoMysql.java
+¦       ¦   ¦   EntidadDeSaludDaoPostgres.java
+¦       ¦   ¦   
+¦       ¦   +---conexion
+¦       ¦           DatabaseConnection.java
+¦       ¦           MongoConnection.java
+¦       ¦           MysqlConnection.java
+¦       ¦           PostgreConnection.java
+¦       ¦           
+¦       +---dto
+¦       ¦       EntidadDeSaludDto.java
+¦       ¦       UsuarioDto.java
+¦       ¦       
+¦       +---external
+¦       ¦       UsuarioServciceClient.java
+¦       ¦       
+¦       +---facade
+¦       ¦       EntidadDeSaludFacade.java
+¦       ¦       
+¦       +---factory
+¦       ¦       DatabaseConnectionFactory.java
+¦       ¦       EntidadDeSaludDaoFactory.java
+¦       ¦       EntidadDeSaludFactory.java
+¦       ¦       
+¦       +---mapper
+¦       ¦       EntidadDeSaludMapper.java
+¦       ¦       
+¦       +---modelo
+¦       ¦       EntidadDeSalud.java
+¦       ¦       EntidadDeSaludPrivada.java
+¦       ¦       EntidadDeSaludPublica.java
+¦       ¦       Usuario.java
+¦       ¦       
+¦       +---presentacion
+¦       ¦       EntidadDeSaludServlet.java
+¦       ¦       
+¦       +---prototype
+¦       ¦       EntidadDeSaludPrototype.java
+¦       ¦       
+¦       +---repositorio
+¦       ¦       EntidadDeSaludRepository.java
+¦       ¦       
+¦       +---servicio
+¦           +---service
+¦           ¦       EntidadDeSaludService.java
+¦           ¦       
+¦           +---serviceImpl
+¦                   EntidadDeSaludServiceImpl.java
+¦                   
++---test
++---web
+    ¦   index.html
+    ¦   
+    +---jsp
+    ¦       crearEntidadDeSalud.jsp
+    ¦       editarEntidadDeSalud.jsp
+    ¦       entidadNoEncontrada.jsp
+    ¦       lsitarEntidadesDeSalud.jsp
+    ¦       verEntidadDeSalud.jsp
+    ¦       
+    +---META-INF
+    ¦       context.xml
+    ¦       
+    +---WEB-INF
