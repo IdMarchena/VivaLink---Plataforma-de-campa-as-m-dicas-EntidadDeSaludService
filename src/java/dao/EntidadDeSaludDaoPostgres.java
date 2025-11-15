@@ -22,9 +22,8 @@ public class EntidadDeSaludDaoPostgres implements EntidadDeSaludDao {
     @Override
     public EntidadDeSalud buscarEntidadDeSaludPorId(int id) {
         String sql = """
-                SELECT e.id, e.nombre, e.direccion, e.telefono, e.salario_base,
-                       e.fecha_nacimiento, e.sexo, e.direccion_usuario,
-                       ep.nit_empresa, ep.codigo_ministerio,
+                SELECT e.id, e.nombre, e.direccion, e.telefono, e.usuario_gerente_id,
+                       ep.nit_empresa, epub.codigo_ministerio,
                        u.id AS usuario_id, u.telefono AS usuario_telefono, u.salario_base AS usuario_salario_base,
                        u.fecha_nacimiento AS usuario_fecha_nacimiento, u.sexo AS usuario_sexo, u.direccion AS usuario_direccion
                 FROM entidades_de_salud e
@@ -134,9 +133,8 @@ public class EntidadDeSaludDaoPostgres implements EntidadDeSaludDao {
     public List<EntidadDeSalud> listarTodasLasEntidadDeSalud() {
         List<EntidadDeSalud> entidades = new ArrayList<>();
         String sql = """
-                SELECT e.id, e.nombre, e.direccion, e.telefono, e.salario_base,
-                       e.fecha_nacimiento, e.sexo, e.direccion_usuario,
-                       ep.nit_empresa, ep.codigo_ministerio,
+                SELECT e.id, e.nombre, e.direccion, e.telefono, e.usuario_gerente_id,
+                       ep.nit_empresa, epub.codigo_ministerio,
                        u.id AS usuario_id, u.telefono AS usuario_telefono, u.salario_base AS usuario_salario_base,
                        u.fecha_nacimiento AS usuario_fecha_nacimiento, u.sexo AS usuario_sexo, u.direccion AS usuario_direccion
                 FROM entidades_de_salud e
@@ -212,33 +210,19 @@ public class EntidadDeSaludDaoPostgres implements EntidadDeSaludDao {
     }
 
     @Override
-    public List<EntidadDeSalud> buscarEntidadDeSaludPorNombre(String tipo){
+    public List<EntidadDeSalud> buscarEntidadDeSaludPorNombre(String nombre){
     List<EntidadDeSalud> entidades = new ArrayList<>();
-    String sql = """
-        SELECT 
-            e.id, 
-            e.nombre, 
-            e.direccion, 
-            e.telefono, 
-            e.salario_base,
-            e.fecha_nacimiento, 
-            e.sexo, 
-            e.direccion_usuario,
-            ep.nit_empresa, 
-            epub.codigo_ministerio,
-            u.id AS usuario_id, 
-            u.telefono AS usuario_telefono, 
-            u.salario_base AS usuario_salario_base,
-            u.fecha_nacimiento AS usuario_fecha_nacimiento, 
-            u.sexo AS usuario_sexo, 
-            u.direccion AS usuario_direccion
-        FROM entidades_de_salud e
-        LEFT JOIN entidades_de_salud_privada ep ON e.id = ep.id
-        LEFT JOIN entidades_de_salud_publica epub ON e.id = epub.id
-        LEFT JOIN usuarios u ON u.id = e.usuario_gerente_id
-        WHERE LOWER(e.nombre)=LOWER(?)
-        """;
-
+        String sql = """
+                SELECT e.id, e.nombre, e.direccion, e.telefono, e.usuario_gerente_id,
+                       ep.nit_empresa, epub.codigo_ministerio,
+                       u.id AS usuario_id, u.telefono AS usuario_telefono, u.salario_base AS usuario_salario_base,
+                       u.fecha_nacimiento AS usuario_fecha_nacimiento, u.sexo AS usuario_sexo, u.direccion AS usuario_direccion
+                FROM entidades_de_salud e
+                LEFT JOIN entidades_de_salud_privada ep ON e.id = ep.id
+                LEFT JOIN entidades_de_salud_publica epub ON e.id = epub.id
+                LEFT JOIN usuarios u ON u.id = e.usuario_gerente_id
+                WHERE LOWER(e.nombre)=LOWER(?)
+                """;
     try (PreparedStatement ps = conn.prepareStatement(sql)) {
     ResultSet rs = ps.executeQuery();
         while (rs.next()) {
@@ -276,32 +260,19 @@ public class EntidadDeSaludDaoPostgres implements EntidadDeSaludDao {
     }
 
     @Override
-    public List<EntidadDeSalud> buscarEntidadDeSaludPorDireccion(String tipo) {
+    public List<EntidadDeSalud> buscarEntidadDeSaludPorDireccion(String direccion) {
         List<EntidadDeSalud> entidades = new ArrayList<>();
-    String sql = """
-        SELECT 
-            e.id, 
-            e.nombre, 
-            e.direccion, 
-            e.telefono, 
-            e.salario_base,
-            e.fecha_nacimiento, 
-            e.sexo, 
-            e.direccion_usuario,
-            ep.nit_empresa, 
-            epub.codigo_ministerio,
-            u.id AS usuario_id, 
-            u.telefono AS usuario_telefono, 
-            u.salario_base AS usuario_salario_base,
-            u.fecha_nacimiento AS usuario_fecha_nacimiento, 
-            u.sexo AS usuario_sexo, 
-            u.direccion AS usuario_direccion
-        FROM entidades_de_salud e
-        LEFT JOIN entidades_de_salud_privada ep ON e.id = ep.id
-        LEFT JOIN entidades_de_salud_publica epub ON e.id = epub.id
-        LEFT JOIN usuarios u ON u.id = e.usuario_gerente_id
-        WHERE LOWER(e.direccion)=LOWER(?)
-        """;
+        String sql = """
+                SELECT e.id, e.nombre, e.direccion, e.telefono, e.usuario_gerente_id,
+                       ep.nit_empresa, epub.codigo_ministerio,
+                       u.id AS usuario_id, u.telefono AS usuario_telefono, u.salario_base AS usuario_salario_base,
+                       u.fecha_nacimiento AS usuario_fecha_nacimiento, u.sexo AS usuario_sexo, u.direccion AS usuario_direccion
+                FROM entidades_de_salud e
+                LEFT JOIN entidades_de_salud_privada ep ON e.id = ep.id
+                LEFT JOIN entidades_de_salud_publica epub ON e.id = epub.id
+                LEFT JOIN usuarios u ON u.id = e.usuario_gerente_id
+                WHERE LOWER(e.direccion)=LOWER(?)
+                """;
 
     try (PreparedStatement ps = conn.prepareStatement(sql)) {
     ResultSet rs = ps.executeQuery();
@@ -342,30 +313,17 @@ public class EntidadDeSaludDaoPostgres implements EntidadDeSaludDao {
     @Override
     public List<EntidadDeSalud> buscarEntidadDeSaludPorGerente(int id) {
             List<EntidadDeSalud> entidades = new ArrayList<>();
-    String sql = """
-        SELECT 
-            e.id, 
-            e.nombre, 
-            e.direccion, 
-            e.telefono, 
-            e.salario_base,
-            e.fecha_nacimiento, 
-            e.sexo, 
-            e.direccion_usuario,
-            ep.nit_empresa, 
-            epub.codigo_ministerio,
-            u.id AS usuario_id, 
-            u.telefono AS usuario_telefono, 
-            u.salario_base AS usuario_salario_base,
-            u.fecha_nacimiento AS usuario_fecha_nacimiento, 
-            u.sexo AS usuario_sexo, 
-            u.direccion AS usuario_direccion
-        FROM entidades_de_salud e
-        LEFT JOIN entidades_de_salud_privada ep ON e.id = ep.id
-        LEFT JOIN entidades_de_salud_publica epub ON e.id = epub.id
-        LEFT JOIN usuarios u ON u.id = e.usuario_gerente_id
-        WHERE e.id=?
-        """;
+            String sql = """
+                SELECT e.id, e.nombre, e.direccion, e.telefono, e.usuario_gerente_id,
+                       ep.nit_empresa, epub.codigo_ministerio,
+                       u.id AS usuario_id, u.telefono AS usuario_telefono, u.salario_base AS usuario_salario_base,
+                       u.fecha_nacimiento AS usuario_fecha_nacimiento, u.sexo AS usuario_sexo, u.direccion AS usuario_direccion
+                FROM entidades_de_salud e
+                LEFT JOIN entidades_de_salud_privada ep ON e.id = ep.id
+                LEFT JOIN entidades_de_salud_publica epub ON e.id = epub.id
+                LEFT JOIN usuarios u ON u.id = e.usuario_gerente_id
+                WHERE e.usuario_gerente_id=?
+                """;
 
     try (PreparedStatement ps = conn.prepareStatement(sql)) {
     ResultSet rs = ps.executeQuery();
