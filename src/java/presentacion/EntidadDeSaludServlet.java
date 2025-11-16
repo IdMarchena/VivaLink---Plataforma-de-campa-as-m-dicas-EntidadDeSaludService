@@ -63,24 +63,12 @@ public class EntidadDeSaludServlet extends HttpServlet {
                 registrarEntidadConUsuario(request, response);
             } else {
                 // Acción no reconocida
-                JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                    false, 
-                    "Acción no reconocida: " + action, 
-                    null, 
-                    HttpServletResponse.SC_BAD_REQUEST
-                );
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(gson.toJson(jsonResponse));
+                response.getWriter().write(gson.toJson("Acción no reconocida: " + action));
             }
-        } catch (Exception e) {
-            JsonResponse<Object> errorResponse = new JsonResponse<>(
-                false, 
-                "Error interno del servidor: " + e.getMessage(), 
-                null, 
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-            );
+        } catch (IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson(errorResponse));
+            response.getWriter().write(gson.toJson("Error interno del servidor: " + e.getMessage()));
         }
     }
 
@@ -98,14 +86,8 @@ public class EntidadDeSaludServlet extends HttpServlet {
                 telefono == null || telefono.isEmpty() || tipo == null || tipo.isEmpty() ||
                 idUsuario == null || idUsuario.isEmpty()) {
                 
-                JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                    false, 
-                    "Todos los campos son requeridos", 
-                    null, 
-                    HttpServletResponse.SC_BAD_REQUEST
-                );
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(gson.toJson(jsonResponse));
+                response.getWriter().write(gson.toJson("Todos los campos son requeridos"));
                 return;
             }
 
@@ -113,38 +95,24 @@ public class EntidadDeSaludServlet extends HttpServlet {
             EntidadDeSaludDto entidadDto = new EntidadDeSaludDto(tipo, nombre, direccion, telefono, idUsuario, usuarioDto);
             entidadDeSaludService.crearEntidadDeSalud(entidadDto);
             
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                true, 
-                "Entidad de Salud creada con éxito", 
-                null, 
-                HttpServletResponse.SC_CREATED
-            );
             response.setStatus(HttpServletResponse.SC_CREATED);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("Entidad de Salud creada con éxito"));
+            
         } catch (Exception e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "Hubo un error al crear la entidad de salud: " + e.getMessage(), 
-                null, 
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-            );
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("Error al crear entidad de salud: " + e.getMessage()));
         }
     }
 
     // Acción para listar las entidades de salud
     private void listarEntidades(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        List<EntidadDeSaludDto> entidades = entidadDeSaludService.listarEntidadeDeSalud();
-        
-        JsonResponse<List<EntidadDeSaludDto>> jsonResponse = new JsonResponse<>(
-            true, 
-            "Entidades de salud obtenidas exitosamente", 
-            entidades, 
-            HttpServletResponse.SC_OK
-        );
-        
-        response.getWriter().write(gson.toJson(jsonResponse));
+        try {
+            List<EntidadDeSaludDto> entidades = entidadDeSaludService.listarEntidadeDeSalud();
+            response.getWriter().write(gson.toJson(entidades));
+        } catch (IOException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(gson.toJson("Error al listar entidades: " + e.getMessage()));
+        }
     }
 
     // Acción para listar entidades de salud por tipo
@@ -152,27 +120,18 @@ public class EntidadDeSaludServlet extends HttpServlet {
         String tipo = request.getParameter("tipo");
         
         if (tipo == null || tipo.isEmpty()) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "El parámetro tipo es requerido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("El parámetro tipo es requerido"));
             return;
         }
         
-        List<EntidadDeSaludDto> entidades = entidadDeSaludService.listarEntidadDeSaludPorTipo(tipo);
-        
-        JsonResponse<List<EntidadDeSaludDto>> jsonResponse = new JsonResponse<>(
-            true, 
-            "Entidades de salud por tipo obtenidas exitosamente", 
-            entidades, 
-            HttpServletResponse.SC_OK
-        );
-        
-        response.getWriter().write(gson.toJson(jsonResponse));
+        try {
+            List<EntidadDeSaludDto> entidades = entidadDeSaludService.listarEntidadDeSaludPorTipo(tipo);
+            response.getWriter().write(gson.toJson(entidades));
+        } catch (IOException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(gson.toJson("Error al listar entidades por tipo: " + e.getMessage()));
+        }
     }
 
     // Acción para listar entidades de salud por dirección
@@ -180,91 +139,52 @@ public class EntidadDeSaludServlet extends HttpServlet {
         String direccion = request.getParameter("direccion");
         
         if (direccion == null || direccion.isEmpty()) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "El parámetro direccion es requerido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
-            return;
-        }
-        
-        List<EntidadDeSaludDto> entidades = entidadDeSaludService.listarEntidadDeSaludPorDireccion(direccion);
-        
-        JsonResponse<List<EntidadDeSaludDto>> jsonResponse = new JsonResponse<>(
-            true, 
-            "Entidades de salud por dirección obtenidas exitosamente", 
-            entidades, 
-            HttpServletResponse.SC_OK
-        );
-        
-        response.getWriter().write(gson.toJson(jsonResponse));
-    }
-
-    // Acción para buscar una entidad de salud por ID
-    private void buscarEntidadDeSalud(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String idd = request.getParameter("id");
-        
-        if (idd == null || idd.isEmpty()) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "El parámetro id es requerido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("El parámetro direccion es requerido"));
             return;
         }
         
         try {
-            int id = Integer.parseInt(idd);
+            List<EntidadDeSaludDto> entidades = entidadDeSaludService.listarEntidadDeSaludPorDireccion(direccion);
+            response.getWriter().write(gson.toJson(entidades));
+        } catch (IOException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(gson.toJson("Error al listar entidades por dirección: " + e.getMessage()));
+        }
+    }
+
+    // Acción para buscar una entidad de salud por ID
+    private void buscarEntidadDeSalud(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String idStr = request.getParameter("id");
+        
+        if (idStr == null || idStr.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(gson.toJson("El parámetro id es requerido"));
+            return;
+        }
+        
+        try {
+            int id = Integer.parseInt(idStr);
             EntidadDeSaludDto entidad = entidadDeSaludService.buscarEntidadDeSalud(id);
             
             if (entidad != null) {
-                JsonResponse<EntidadDeSaludDto> jsonResponse = new JsonResponse<>(
-                    true, 
-                    "Entidad de salud encontrada", 
-                    entidad, 
-                    HttpServletResponse.SC_OK
-                );
-                response.getWriter().write(gson.toJson(jsonResponse));
+                response.getWriter().write(gson.toJson(entidad));
             } else {
-                JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                    false, 
-                    "Entidad de salud no encontrada", 
-                    null, 
-                    HttpServletResponse.SC_NOT_FOUND
-                );
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.getWriter().write(gson.toJson(jsonResponse));
+                response.getWriter().write(gson.toJson("Entidad de salud no encontrada"));
             }
         } catch (NumberFormatException e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "ID de entidad de salud inválido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
-        } catch (Exception e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "Error al buscar la entidad de salud: " + e.getMessage(), 
-                null, 
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-            );
+            response.getWriter().write(gson.toJson("ID de entidad de salud inválido"));
+        } catch (IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("Error al buscar entidad de salud: " + e.getMessage()));
         }
     }
 
     // Acción para actualizar una entidad de salud
     private void actualizarEntidadDeSalud(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String idd = request.getParameter("id");
+        String idStr = request.getParameter("id");
         String nombre = request.getParameter("nombre");
         String direccion = request.getParameter("direccion");
         String telefono = request.getParameter("telefono");
@@ -272,21 +192,15 @@ public class EntidadDeSaludServlet extends HttpServlet {
         String idUsuario = request.getParameter("idUsuario");
 
         try {
-            int id = Integer.parseInt(idd);
+            int id = Integer.parseInt(idStr);
             
             // Validar parámetros requeridos
             if (nombre == null || nombre.isEmpty() || direccion == null || direccion.isEmpty() ||
                 telefono == null || telefono.isEmpty() || tipo == null || tipo.isEmpty() ||
                 idUsuario == null || idUsuario.isEmpty()) {
                 
-                JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                    false, 
-                    "Todos los campos son requeridos", 
-                    null, 
-                    HttpServletResponse.SC_BAD_REQUEST
-                );
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(gson.toJson(jsonResponse));
+                response.getWriter().write(gson.toJson("Todos los campos son requeridos"));
                 return;
             }
 
@@ -294,67 +208,33 @@ public class EntidadDeSaludServlet extends HttpServlet {
             EntidadDeSaludDto entidadDto = new EntidadDeSaludDto(tipo, nombre, direccion, telefono, idUsuario, usuarioDto);
             entidadDeSaludService.actualizarEntidadDeSalud(id, entidadDto);
             
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                true, 
-                "Entidad de Salud actualizada con éxito", 
-                null, 
-                HttpServletResponse.SC_OK
-            );
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("Entidad de Salud actualizada con éxito"));
+            
         } catch (NumberFormatException e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "ID de entidad de salud inválido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("ID de entidad de salud inválido"));
         } catch (Exception e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "Hubo un error al actualizar la entidad de salud: " + e.getMessage(), 
-                null, 
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-            );
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("Error al actualizar entidad de salud: " + e.getMessage()));
         }
     }
 
     // Acción para eliminar una entidad de salud
     private void eliminarEntidadDeSalud(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String idd = request.getParameter("id");
+        String idStr = request.getParameter("id");
 
         try {
-            int id = Integer.parseInt(idd);
+            int id = Integer.parseInt(idStr);
             entidadDeSaludService.eliminarEntidadDeSalud(id);
             
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                true, 
-                "Entidad de Salud eliminada con éxito", 
-                null, 
-                HttpServletResponse.SC_OK
-            );
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("Entidad de Salud eliminada con éxito"));
+            
         } catch (NumberFormatException e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "ID de entidad de salud inválido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
-        } catch (Exception e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "Hubo un error al eliminar la entidad de salud: " + e.getMessage(), 
-                null, 
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-            );
+            response.getWriter().write(gson.toJson("ID de entidad de salud inválido"));
+        } catch (IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("Error al eliminar entidad de salud: " + e.getMessage()));
         }
     }
 
@@ -363,46 +243,21 @@ public class EntidadDeSaludServlet extends HttpServlet {
         String idUsuarioGerente = request.getParameter("idUsuarioGerente");
         
         if (idUsuarioGerente == null || idUsuarioGerente.isEmpty()) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "El parámetro idUsuarioGerente es requerido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("El parámetro idUsuarioGerente es requerido"));
             return;
         }
         
         try {
             List<EntidadDeSaludDto> entidades = entidadDeSaludService.buscarEntidadDeSaludPorGerente(Integer.parseInt(idUsuarioGerente));
+            response.getWriter().write(gson.toJson(entidades));
             
-            JsonResponse<List<EntidadDeSaludDto>> jsonResponse = new JsonResponse<>(
-                true, 
-                "Entidades de salud por gerente obtenidas exitosamente", 
-                entidades, 
-                HttpServletResponse.SC_OK
-            );
-            
-            response.getWriter().write(gson.toJson(jsonResponse));
         } catch (NumberFormatException e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "ID de usuario gerente inválido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
-        } catch (Exception e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "Error al buscar entidades por gerente: " + e.getMessage(), 
-                null, 
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-            );
+            response.getWriter().write(gson.toJson("ID de usuario gerente inválido"));
+        } catch (IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("Error al buscar entidades por gerente: " + e.getMessage()));
         }
     }
 
@@ -411,27 +266,19 @@ public class EntidadDeSaludServlet extends HttpServlet {
         String nombre = request.getParameter("nombre");
         
         if (nombre == null || nombre.isEmpty()) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "El parámetro nombre es requerido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("El parámetro nombre es requerido"));
             return;
         }
         
-        boolean existe = entidadDeSaludService.existeEntidadConNombre(nombre);
-        
-        JsonResponse<Boolean> jsonResponse = new JsonResponse<>(
-            true, 
-            "Verificación de existencia completada", 
-            existe, 
-            HttpServletResponse.SC_OK
-        );
-        
-        response.getWriter().write(gson.toJson(jsonResponse));
+        try {
+            boolean existe = entidadDeSaludService.existeEntidadConNombre(nombre);
+            response.getWriter().write(gson.toJson(existe));
+            
+        } catch (IOException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(gson.toJson("Error al verificar existencia: " + e.getMessage()));
+        }
     }
 
     // Acción para contar las entidades de salud por tipo
@@ -439,27 +286,19 @@ public class EntidadDeSaludServlet extends HttpServlet {
         String tipo = request.getParameter("tipo");
         
         if (tipo == null || tipo.isEmpty()) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "El parámetro tipo es requerido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("El parámetro tipo es requerido"));
             return;
         }
         
-        int cantidad = entidadDeSaludService.contarEntidadesPorTipo(tipo);
-        
-        JsonResponse<Integer> jsonResponse = new JsonResponse<>(
-            true, 
-            "Conteo de entidades por tipo completado", 
-            cantidad, 
-            HttpServletResponse.SC_OK
-        );
-        
-        response.getWriter().write(gson.toJson(jsonResponse));
+        try {
+            int cantidad = entidadDeSaludService.contarEntidadesPorTipo(tipo);
+            response.getWriter().write(gson.toJson(cantidad));
+            
+        } catch (IOException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(gson.toJson("Error al contar entidades: " + e.getMessage()));
+        }
     }
 
     // Acción para registrar una entidad de salud con un usuario
@@ -476,14 +315,8 @@ public class EntidadDeSaludServlet extends HttpServlet {
                 telefono == null || telefono.isEmpty() || tipo == null || tipo.isEmpty() ||
                 idUsuario == null || idUsuario.isEmpty()) {
                 
-                JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                    false, 
-                    "Todos los campos son requeridos", 
-                    null, 
-                    HttpServletResponse.SC_BAD_REQUEST
-                );
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(gson.toJson(jsonResponse));
+                response.getWriter().write(gson.toJson("Todos los campos son requeridos"));
                 return;
             }
 
@@ -491,36 +324,19 @@ public class EntidadDeSaludServlet extends HttpServlet {
             EntidadDeSaludDto entidadDto = new EntidadDeSaludDto(tipo, nombre, direccion, telefono, idUsuario, usuarioDto);
             entidadDeSaludService.registrarEntidadConUsuario(entidadDto);
             
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                true, 
-                "Entidad de Salud registrada con éxito", 
-                null, 
-                HttpServletResponse.SC_CREATED
-            );
             response.setStatus(HttpServletResponse.SC_CREATED);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("Entidad de Salud registrada con éxito"));
+            
         } catch (NumberFormatException e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "ID de usuario inválido", 
-                null, 
-                HttpServletResponse.SC_BAD_REQUEST
-            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("ID de usuario inválido"));
         } catch (Exception e) {
-            JsonResponse<Object> jsonResponse = new JsonResponse<>(
-                false, 
-                "Hubo un error al registrar la entidad de salud: " + e.getMessage(), 
-                null, 
-                HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-            );
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write(gson.toJson("Error al registrar entidad: " + e.getMessage()));
         }
     }
 
-    // Método para obtener el UsuarioDto por ID (esto debería hacerse en tu servicio o DAO)
+    // Método para obtener el UsuarioDto por ID
     private UsuarioDto obtenerUsuarioPorId(int idUsuario) throws Exception {
         return new UsuarioDto(idUsuario, "telefonoEjemplo", 5000, java.time.LocalDate.now(), "Masculino", "Direccion Ejemplo");
     }
