@@ -3,7 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Record.java to edit this template
  */
 package dto;
-import dto.UsuarioDto;
 /**
  *
  * @author Usuario

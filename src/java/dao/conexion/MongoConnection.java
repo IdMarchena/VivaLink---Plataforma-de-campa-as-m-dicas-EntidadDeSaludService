@@ -28,7 +28,7 @@ public class MongoConnection implements DatabaseConnection{
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
     @Override
-    public Connection getConection() {
+    public Connection getConnection() {
         try {
             return conexion();
         } catch (SQLException ex) {

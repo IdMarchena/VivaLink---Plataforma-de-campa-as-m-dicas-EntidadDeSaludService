@@ -4,6 +4,7 @@
  */
 package servicio.service;
 import dto.EntidadDeSaludDto;
+import dto.UsuarioDto;
 import java.util.List;
 /**
  *
@@ -27,5 +28,7 @@ public interface EntidadDeSaludService {
     int contarEntidadesPorTipo(String tipo);
     
     void registrarEntidadConUsuario(EntidadDeSaludDto entidadDto);
+    
+    UsuarioDto buscarUsuarioPorIdEntidadDeSalud(int id);
     
 }

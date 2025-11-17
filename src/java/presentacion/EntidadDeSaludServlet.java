@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.time.LocalDate;
+import util.LocalDateAdapter; // Asegúrate de crear esta clase
 
 @WebServlet(name = "EntidadDeSaludServlet", urlPatterns = {"/EntidadDeSaludServlet"})
 public class EntidadDeSaludServlet extends HttpServlet {
@@ -20,10 +23,15 @@ public class EntidadDeSaludServlet extends HttpServlet {
     private final EntidadDeSaludService entidadDeSaludService;
     private final Gson gson;
 
-    // Constructor
+    // Constructor corregido
     public EntidadDeSaludServlet() throws SQLException {
-        this.entidadDeSaludService = new EntidadDeSaludServiceImpl("TipoDb");
-        this.gson = new Gson();
+        this.entidadDeSaludService = new EntidadDeSaludServiceImpl();
+        
+        // Configurar Gson con el adaptador para LocalDate
+        this.gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+            .setDateFormat("yyyy-MM-dd")
+            .create();
     }
 
     // Método para procesar las peticiones
@@ -38,14 +46,15 @@ public class EntidadDeSaludServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
-            // Filtra las acciones según el parámetro "action"
             if ("crear".equals(action)) {
                 crearEntidadDeSalud(request, response);
             } else if ("listar".equals(action)) {
                 listarEntidades(request, response);
             } else if ("buscar".equals(action)) {
                 buscarEntidadDeSalud(request, response);
-            } else if ("actualizar".equals(action)) {
+            }  else if ("buscarUsuario".equals(action)) {
+                buscarUsuarioPorIdEntidadDeSalud(request,response);                
+            }else if ("actualizar".equals(action)) {
                 actualizarEntidadDeSalud(request, response);
             } else if ("eliminar".equals(action)) {
                 eliminarEntidadDeSalud(request, response);
@@ -62,37 +71,76 @@ public class EntidadDeSaludServlet extends HttpServlet {
             } else if ("registrarEntidadConUsuario".equals(action)) {
                 registrarEntidadConUsuario(request, response);
             } else {
-                // Acción no reconocida
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write(gson.toJson("Acción no reconocida: " + action));
             }
         } catch (IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(gson.toJson("Error interno del servidor: " + e.getMessage()));
+            // Para debugging
         }
     }
-
-    // Acción para crear una entidad de salud
-    private void crearEntidadDeSalud(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String nombre = request.getParameter("nombre");
-        String direccion = request.getParameter("direccion");
-        String telefono = request.getParameter("telefono");
-        String tipo = request.getParameter("tipo");
-        String idUsuario = request.getParameter("idUsuario");
-
+    private void buscarUsuarioPorIdEntidadDeSalud(HttpServletRequest request, HttpServletResponse response) throws IOException{
+     String idStr = request.getParameter("id");
+        
+        if (idStr == null || idStr.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(gson.toJson("El parámetro id es requerido"));
+            return;
+        }
+        
         try {
+            int id = Integer.parseInt(idStr);
+            UsuarioDto usuario = entidadDeSaludService.buscarUsuarioPorIdEntidadDeSalud(id);
+            
+            if (usuario != null) {
+                response.getWriter().write(gson.toJson(usuario));
+            } else {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().write(gson.toJson("Entidad de salud no encontrada"));
+            }
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(gson.toJson("ID de entidad de salud inválido"));
+        } catch (IOException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(gson.toJson("Error al buscar el usuario de la entidad de salud: " + e.getMessage()));
+        }
+    }
+    
+
+    // Acción para crear una entidad de salud - CORREGIDO
+    private void crearEntidadDeSalud(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            String nombre = request.getParameter("nombre");
+            String direccion = request.getParameter("direccion");
+            String telefono = request.getParameter("telefono");
+            String tipo = request.getParameter("tipo");
+            String idUsuario = request.getParameter("idUsuario");
+            String identificador = request.getParameter("identificador"); // NIT o Código Ministerio
+
             // Validar parámetros requeridos
             if (nombre == null || nombre.isEmpty() || direccion == null || direccion.isEmpty() ||
                 telefono == null || telefono.isEmpty() || tipo == null || tipo.isEmpty() ||
-                idUsuario == null || idUsuario.isEmpty()) {
+                idUsuario == null || idUsuario.isEmpty() || identificador == null || identificador.isEmpty()) {
                 
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(gson.toJson("Todos los campos son requeridos"));
+                response.getWriter().write(gson.toJson("Todos los campos son requeridos, incluido el identificador (NIT/Código Ministerio)"));
                 return;
             }
 
             UsuarioDto usuarioDto = obtenerUsuarioPorId(Integer.parseInt(idUsuario));
-            EntidadDeSaludDto entidadDto = new EntidadDeSaludDto(tipo, nombre, direccion, telefono, idUsuario, usuarioDto);
+            
+            // Crear DTO con el identificador correcto
+            EntidadDeSaludDto entidadDto = new EntidadDeSaludDto(
+                tipo, 
+                nombre, 
+                direccion, 
+                telefono,                 
+                identificador,
+                usuarioDto
+            );
+            
             entidadDeSaludService.crearEntidadDeSalud(entidadDto);
             
             response.setStatus(HttpServletResponse.SC_CREATED);
@@ -152,6 +200,7 @@ public class EntidadDeSaludServlet extends HttpServlet {
             response.getWriter().write(gson.toJson("Error al listar entidades por dirección: " + e.getMessage()));
         }
     }
+    
 
     // Acción para buscar una entidad de salud por ID
     private void buscarEntidadDeSalud(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -182,30 +231,39 @@ public class EntidadDeSaludServlet extends HttpServlet {
         }
     }
 
-    // Acción para actualizar una entidad de salud
+    // Acción para actualizar una entidad de salud - CORREGIDO
     private void actualizarEntidadDeSalud(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String idStr = request.getParameter("id");
-        String nombre = request.getParameter("nombre");
-        String direccion = request.getParameter("direccion");
-        String telefono = request.getParameter("telefono");
-        String tipo = request.getParameter("tipo");
-        String idUsuario = request.getParameter("idUsuario");
-
         try {
+            String idStr = request.getParameter("id");
+            String nombre = request.getParameter("nombre");
+            String direccion = request.getParameter("direccion");
+            String telefono = request.getParameter("telefono");
+            String tipo = request.getParameter("tipo");
+            String idUsuario = request.getParameter("idUsuario");
+            String identificador = request.getParameter("identificador"); // NIT o Código Ministerio
+
             int id = Integer.parseInt(idStr);
             
             // Validar parámetros requeridos
             if (nombre == null || nombre.isEmpty() || direccion == null || direccion.isEmpty() ||
                 telefono == null || telefono.isEmpty() || tipo == null || tipo.isEmpty() ||
-                idUsuario == null || idUsuario.isEmpty()) {
+                idUsuario == null || idUsuario.isEmpty() || identificador == null || identificador.isEmpty()) {
                 
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(gson.toJson("Todos los campos son requeridos"));
+                response.getWriter().write(gson.toJson("Todos los campos son requeridos, incluido el identificador (NIT/Código Ministerio)"));
                 return;
             }
 
             UsuarioDto usuarioDto = obtenerUsuarioPorId(Integer.parseInt(idUsuario));
-            EntidadDeSaludDto entidadDto = new EntidadDeSaludDto(tipo, nombre, direccion, telefono, idUsuario, usuarioDto);
+            EntidadDeSaludDto entidadDto = new EntidadDeSaludDto(
+                tipo, 
+                nombre, 
+                direccion, 
+                telefono, 
+                identificador,
+                usuarioDto                
+            );
+            
             entidadDeSaludService.actualizarEntidadDeSalud(id, entidadDto);
             
             response.getWriter().write(gson.toJson("Entidad de Salud actualizada con éxito"));
@@ -216,6 +274,7 @@ public class EntidadDeSaludServlet extends HttpServlet {
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(gson.toJson("Error al actualizar entidad de salud: " + e.getMessage()));
+            e.printStackTrace();
         }
     }
 
@@ -255,7 +314,7 @@ public class EntidadDeSaludServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(gson.toJson("ID de usuario gerente inválido"));
-        } catch (IOException e) {
+        } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(gson.toJson("Error al buscar entidades por gerente: " + e.getMessage()));
         }
@@ -275,7 +334,7 @@ public class EntidadDeSaludServlet extends HttpServlet {
             boolean existe = entidadDeSaludService.existeEntidadConNombre(nombre);
             response.getWriter().write(gson.toJson(existe));
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(gson.toJson("Error al verificar existencia: " + e.getMessage()));
         }
@@ -295,7 +354,7 @@ public class EntidadDeSaludServlet extends HttpServlet {
             int cantidad = entidadDeSaludService.contarEntidadesPorTipo(tipo);
             response.getWriter().write(gson.toJson(cantidad));
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(gson.toJson("Error al contar entidades: " + e.getMessage()));
         }
@@ -303,25 +362,33 @@ public class EntidadDeSaludServlet extends HttpServlet {
 
     // Acción para registrar una entidad de salud con un usuario
     private void registrarEntidadConUsuario(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String nombre = request.getParameter("nombre");
-        String direccion = request.getParameter("direccion");
-        String telefono = request.getParameter("telefono");
-        String tipo = request.getParameter("tipo");
-        String idUsuario = request.getParameter("idUsuario");
-
         try {
+            String nombre = request.getParameter("nombre");
+            String direccion = request.getParameter("direccion");
+            String telefono = request.getParameter("telefono");
+            String tipo = request.getParameter("tipo");
+            String idUsuario = request.getParameter("idUsuario");
+            String identificador = request.getParameter("identificador");
+
             // Validar parámetros requeridos
             if (nombre == null || nombre.isEmpty() || direccion == null || direccion.isEmpty() ||
                 telefono == null || telefono.isEmpty() || tipo == null || tipo.isEmpty() ||
-                idUsuario == null || idUsuario.isEmpty()) {
+                idUsuario == null || idUsuario.isEmpty() || identificador == null || identificador.isEmpty()) {
                 
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(gson.toJson("Todos los campos son requeridos"));
+                response.getWriter().write(gson.toJson("Todos los campos son requeridos, incluido el identificador (NIT/Código Ministerio)"));
                 return;
             }
 
             UsuarioDto usuarioDto = obtenerUsuarioPorId(Integer.parseInt(idUsuario));
-            EntidadDeSaludDto entidadDto = new EntidadDeSaludDto(tipo, nombre, direccion, telefono, idUsuario, usuarioDto);
+            EntidadDeSaludDto entidadDto = new EntidadDeSaludDto(
+                tipo, 
+                nombre, 
+                direccion, 
+                telefono, 
+                identificador,
+                usuarioDto
+            );            
             entidadDeSaludService.registrarEntidadConUsuario(entidadDto);
             
             response.setStatus(HttpServletResponse.SC_CREATED);
@@ -333,12 +400,15 @@ public class EntidadDeSaludServlet extends HttpServlet {
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(gson.toJson("Error al registrar entidad: " + e.getMessage()));
+            e.printStackTrace();
         }
     }
 
-    // Método para obtener el UsuarioDto por ID
+    // Método para obtener el UsuarioDto por ID - MEJORADO
     private UsuarioDto obtenerUsuarioPorId(int idUsuario) throws Exception {
-        return new UsuarioDto(idUsuario, "telefonoEjemplo", 5000, java.time.LocalDate.now(), "Masculino", "Direccion Ejemplo");
+        // En una implementación real, aquí llamarías a un servicio de usuarios
+        // Por ahora, devolvemos un usuario simulado
+        return  entidadDeSaludService.buscarUsuarioPorIdEntidadDeSalud(idUsuario);
     }
 
     @Override

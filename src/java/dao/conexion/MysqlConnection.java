@@ -28,7 +28,7 @@ public class MysqlConnection implements DatabaseConnection{
     }
 
     @Override
-    public Connection getConection() {
+    public Connection getConnection() {
         try {
             return conexion();
         } catch (SQLException ex) {

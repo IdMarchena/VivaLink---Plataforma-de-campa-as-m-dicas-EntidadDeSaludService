@@ -11,5 +11,5 @@ import java.sql.Connection;
  * @author Usuario
  */
 public interface DatabaseConnection {
-    Connection getConection();
+    Connection getConnection();
 }

@@ -8,14 +8,15 @@ import factory.EntidadDeSaludDaoFactory;
 import java.sql.SQLException;
 import java.util.List;
 import modelo.EntidadDeSalud;
+import modelo.Usuario;
 /**
  *
  * @author Usuario
  */
 public class EntidadDeSaludRepository {
     private final EntidadDeSaludDao entidadDeSaludDao;
-    public EntidadDeSaludRepository(String tipoDb) throws SQLException{    
-        entidadDeSaludDao = EntidadDeSaludDaoFactory.dao(tipoDb);
+    public EntidadDeSaludRepository() throws SQLException{    
+        entidadDeSaludDao = EntidadDeSaludDaoFactory.dao("postgres");
     }
     
     public EntidadDeSalud buscarEntidadDeSaludPorId(int id) {
@@ -49,6 +50,10 @@ public class EntidadDeSaludRepository {
 
     public List<EntidadDeSalud> buscarEntidadDeSaludPorGerente(int idUsuarioGerente) {
         return entidadDeSaludDao.buscarEntidadDeSaludPorGerente(idUsuarioGerente);
+    }
+    
+    public Usuario buscarUsuarioPorIdEntidadDeSalud(int id){
+        return entidadDeSaludDao.buscarUsuarioPorIdEntidadDeSalud(id);
     }
 
     

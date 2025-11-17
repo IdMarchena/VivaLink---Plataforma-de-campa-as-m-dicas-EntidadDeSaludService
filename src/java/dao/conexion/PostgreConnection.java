@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  */
 public class PostgreConnection implements DatabaseConnection{
     private Connection connection;
-    private static final String URL="jdbc://postgresql://localhost:5432/UsuarioService";
+    private static final String URL="jdbc:postgresql://localhost:5432/EntidadDeSaludService";
     private static final String USER="postgres";
     private static final String PASSWORD="12345678";
 
@@ -30,7 +30,7 @@ public class PostgreConnection implements DatabaseConnection{
     }
 
     @Override
-    public Connection getConection() {
+    public Connection getConnection() {
         try {
             return conexion();
         } catch (SQLException ex) {

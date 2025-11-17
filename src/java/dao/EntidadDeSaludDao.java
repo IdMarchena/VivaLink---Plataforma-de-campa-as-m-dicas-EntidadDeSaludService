@@ -6,6 +6,7 @@ package dao;
 
 import java.util.List;
 import modelo.EntidadDeSalud;
+import modelo.Usuario;
 /**
  *
  * @author Usuario
@@ -20,4 +21,5 @@ public interface EntidadDeSaludDao {
     void eliminarEntidadDeSalud(int id);
     List<EntidadDeSalud> buscarEntidadDeSaludPorDireccion(String tipo);
     List<EntidadDeSalud> buscarEntidadDeSaludPorGerente(int id);
+    Usuario buscarUsuarioPorIdEntidadDeSalud(int id);
 }

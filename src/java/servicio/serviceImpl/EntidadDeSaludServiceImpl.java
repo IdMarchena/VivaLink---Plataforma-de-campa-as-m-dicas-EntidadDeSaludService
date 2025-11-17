@@ -18,9 +18,9 @@ public class EntidadDeSaludServiceImpl implements EntidadDeSaludService {
     private final EntidadDeSaludRepository repository;
     private final EntidadDeSaludMapper mapper;
 
-    public EntidadDeSaludServiceImpl(String tipoDb) throws SQLException {
+    public EntidadDeSaludServiceImpl() throws SQLException {
         this.usuarioServiceClient = new UsuarioServciceClient();
-        this.repository = new EntidadDeSaludRepository(tipoDb);
+        this.repository = new EntidadDeSaludRepository();
         this.mapper = new EntidadDeSaludMapper(); // Inicializamos el Mapper
     }
 
@@ -129,5 +129,10 @@ public class EntidadDeSaludServiceImpl implements EntidadDeSaludService {
     public void registrarEntidadConUsuario(EntidadDeSaludDto entidadDto) {
         // Reutilizar el método de creación
         crearEntidadDeSalud(entidadDto);
+    }
+
+    @Override
+    public UsuarioDto buscarUsuarioPorIdEntidadDeSalud(int id) {
+        return mapper.toUsuarioDto(repository.buscarUsuarioPorIdEntidadDeSalud(id));
     }
 }

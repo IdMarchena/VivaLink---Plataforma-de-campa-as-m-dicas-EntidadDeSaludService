@@ -8,9 +8,6 @@ import modelo.Usuario;
 import modelo.EntidadDeSaludPublica;
 import modelo.EntidadDeSaludPrivada;
 import modelo.EntidadDeSalud;
-import dao.conexion.MongoConnection;
-import dao.conexion.MysqlConnection;
-import dao.conexion.PostgreConnection;
 /**
  *
  * @author Usuario

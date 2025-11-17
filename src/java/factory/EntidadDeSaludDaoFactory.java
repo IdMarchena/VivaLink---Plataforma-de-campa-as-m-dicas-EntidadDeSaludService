@@ -8,6 +8,7 @@ import dao.EntidadDeSaludDaoMongo;
 import dao.EntidadDeSaludDaoMysql;
 import dao.EntidadDeSaludDaoPostgres;
 import java.sql.SQLException;
+import dao.conexion.DatabaseConnection;
 
 /**
  *
@@ -15,15 +16,18 @@ import java.sql.SQLException;
  */
 public class EntidadDeSaludDaoFactory {
     public static EntidadDeSaludDao dao(String tipoDao) throws SQLException{
+        DatabaseConnection conn = DatabaseConnectionFactory.connection(tipoDao);
                 switch (tipoDao.toLowerCase()) {
-            case "postgre":
-                return new EntidadDeSaludDaoPostgres(tipoDao);
-            case "mysql":
-                return new EntidadDeSaludDaoMysql();
-            case "mongo":
-                return new EntidadDeSaludDaoMongo();               
-            default:
-                throw new AssertionError();
+            case "postgres" -> {
+                return new EntidadDeSaludDaoPostgres(conn);
+            }
+            case "mysql" -> {
+                return new EntidadDeSaludDaoMysql(conn);
+            }
+            case "mongo" -> {
+                return new EntidadDeSaludDaoMongo(conn);
+            }
+            default -> throw new AssertionError();
         }
     }
 }
